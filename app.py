@@ -29,7 +29,7 @@ def index():
     sign_types = {
         "Blade Sign": "blade_sign",
         "Flatcut Letters": "flatcut_letters",
-        "Backlit Metal Signs": "backlit_metal_signs"
+        "Backlit Metal Signs": "halolit_channel_letters"
     }
 
     if request.method == "POST":
