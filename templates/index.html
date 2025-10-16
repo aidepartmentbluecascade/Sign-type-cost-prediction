@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Cost Predictor - Professional Estimation Tool</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            max-width: min(600px, 95vw);
+            width: 100%;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            overflow: hidden;
+            max-height: 95vh;
+            overflow-y: auto;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            padding: 25px 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2rem;
+            margin-bottom: 8px;
+            font-weight: 300;
+        }
+        
+        .header p {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+        
+        .form-container {
+            padding: 25px 30px;
+        }
+        
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+        
+        .form-group:first-child {
+            grid-column: 1 / -1;
+        }
+        
+        .form-group {
+            position: relative;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 0.9rem;
+        }
+        
+        .form-group select,
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e1e8ed;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+            background: white;
+        }
+        
+        .form-group select:focus,
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .form-group input[readonly] {
+            background: #f8f9fa;
+            color: #6c757d;
+        }
+        
+        .predict-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .predict-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(102, 126, 234, 0.3);
+        }
+        
+        .predict-btn:active {
+            transform: translateY(0);
+        }
+        
+        .results {
+            margin-top: 25px;
+            padding: 20px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 12px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .results h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+            text-align: center;
+        }
+        
+        .cost-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .cost-item {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+        }
+        
+        .cost-label {
+            font-size: 0.85rem;
+            color: #6c757d;
+            margin-bottom: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .cost-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #2c3e50;
+        }
+        
+        .total-cost {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            margin-top: 15px;
+        }
+        
+        .total-cost .cost-label {
+            color: rgba(255,255,255,0.9);
+        }
+        
+        .total-cost .cost-value {
+            color: white;
+            font-size: 1.8rem;
+        }
+        
+        .error {
+            background: #ffebee;
+            color: #c62828;
+            padding: 12px;
+            border-radius: 8px;
+            border-left: 4px solid #f44336;
+            margin-top: 15px;
+        }
+        
+        @media (max-width: 768px) {
+            body {
+                padding: 5px;
+            }
+            
+            .container {
+                max-width: 98vw;
+                max-height: 98vh;
+            }
+            
+            .header {
+                padding: 20px;
+            }
+            
+            .header h1 {
+                font-size: 1.7rem;
+            }
+            
+            .form-container {
+                padding: 20px;
+            }
+            
+            .form-grid {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+            
+            .form-group:first-child {
+                grid-column: 1;
+            }
+            
+            .cost-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        @media (max-height: 600px) {
+            .header {
+                padding: 15px 20px;
+            }
+            
+            .header h1 {
+                font-size: 1.5rem;
+                margin-bottom: 5px;
+            }
+            
+            .header p {
+                font-size: 0.9rem;
+            }
+            
+            .form-container {
+                padding: 15px 20px;
+            }
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            margin-top: 15px;
+        }
+        
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 25px;
+            height: 25px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 8px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Sign Cost Predictor</h1>
+            <p>Professional estimation tool for custom signage projects</p>
+        </div>
+        
+        <div class="form-container">
+            <form method="post" id="costForm">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="sign_type">Sign Type</label>
+                        <select name="sign_type" id="sign_type" onchange="updateDepth()" required>
+                            <option value="">Select sign type...</option>
+                            <option value="Flatcut Letters">Flatcut Letters</option>
+                            <option value="Blade Sign">Blade Sign</option>
+                            <option value="Halo lit Chanel letter sign">Halo lit Channel Letter Sign</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="width">Width (inches)</label>
+                        <input type="number" name="width" id="width" step="0.1" min="0.1" required onchange="calculateArea()" placeholder="Enter width">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="height">Height (inches)</label>
+                        <input type="number" name="height" id="height" step="0.1" min="0.1" required onchange="calculateArea()" placeholder="Enter height">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="depth">Depth (inches)</label>
+                        <input type="number" name="depth" id="depth" step="0.01" readonly>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="area">Area (sq. inches)</label>
+                        <input type="number" name="area" id="area" step="0.1" readonly>
+                    </div>
+                </div>
+                
+                <button type="submit" class="predict-btn">Calculate Cost Estimate</button>
+                
+                <div class="loading" id="loading">
+                    <div class="spinner"></div>
+                    <p>Calculating your estimate...</p>
+                </div>
+            </form>
+            
+            {% if result %}
+                {% if result.error %}
+                    <div class="error">
+                        {{ result.error }}
+                    </div>
+                {% else %}
+                    <div class="results">
+                        <h3>Predicted Cost</h3>
+                        <div class="cost-grid">
+                            <div class="cost-item">
+                                <div class="cost-label">Production Cost</div>
+                                <div class="cost-value">${{ result.production_cost }}</div>
+                            </div>
+                            <div class="cost-item">
+                                <div class="cost-label">Shipping Cost</div>
+                                <div class="cost-value">${{ result.shipping_cost }}</div>
+                            </div>
+                        </div>
+                        <div class="total-cost">
+                            <div class="cost-label">Total Estimated Cost </div>
+                            <div class="cost-value">${{ result.total_cost }}</div>
+                        </div>
+                    </div>
+
+                    {% if result.exact_match %}
+                        <div class="results" style="margin-top:16px;" aria-live="polite">
+                            <h3>Actual Cost</h3>
+                            <div class="cost-grid">
+                                <div class="cost-item">
+                                    <div class="cost-label">Production Cost</div>
+                                    <div class="cost-value">${{ result.actual_production_cost }}</div>
+                                </div>
+                                <div class="cost-item">
+                                    <div class="cost-label">Shipping Cost</div>
+                                    <div class="cost-value">${{ result.actual_shipping_cost }}</div>
+                                </div>
+                            </div>
+                            <div class="total-cost">
+                                <div class="cost-label">Total Cost </div>
+                                <div class="cost-value">${{ result.actual_total_cost }}</div>
+                            </div>
+                        </div>
+                    {% endif %}
+                {% endif %}
+            {% else %}
+                <div class="results" id="defaultResults">
+                    <h3>Cost Breakdown</h3>
+                    <div class="cost-grid">
+                        <div class="cost-item">
+                            <div class="cost-label">Production Cost</div>
+                            <div class="cost-value" id="productionCost">$0</div>
+                        </div>
+                        <div class="cost-item">
+                            <div class="cost-label">Shipping Cost</div>
+                            <div class="cost-value" id="shippingCost">$0</div>
+                        </div>
+                    </div>
+                    <div class="total-cost">
+                        <div class="cost-label">Total Estimated Cost</div>
+                        <div class="cost-value" id="totalCost">$0</div>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <script>
+        const depthValues = {
+            'Flatcut Letters': 0.25, 
+            'Blade Sign': 2.0, 
+            'Halo lit Chanel letter sign': 1.0
+        };
+        
+        function updateDepth() {
+            const signType = document.getElementById('sign_type').value;
+            const depthInput = document.getElementById('depth');
+            
+            if (signType && depthValues[signType]) {
+                depthInput.value = depthValues[signType];
+                calculateArea();
+            } else {
+                depthInput.value = '';
+            }
+            updateCostDisplay();
+        }
+        
+        function calculateArea() {
+            const width = parseFloat(document.getElementById('width').value);
+            const height = parseFloat(document.getElementById('height').value);
+            const areaInput = document.getElementById('area');
+            
+            if (!isNaN(width) && !isNaN(height) && width > 0 && height > 0) {
+                areaInput.value = (width * height).toFixed(2);
+            } else {
+                areaInput.value = '';
+            }
+            updateCostDisplay();
+        }
+        
+        function updateCostDisplay() {
+            const signType = document.getElementById('sign_type').value;
+            const width = parseFloat(document.getElementById('width').value);
+            const height = parseFloat(document.getElementById('height').value);
+            
+            const productionCostEl = document.getElementById('productionCost');
+            const shippingCostEl = document.getElementById('shippingCost');
+            const totalCostEl = document.getElementById('totalCost');
+            
+            if (!signType || !width || !height || width <= 0 || height <= 0) {
+                if (productionCostEl) productionCostEl.textContent = '$0';
+                if (shippingCostEl) shippingCostEl.textContent = '$0';
+                if (totalCostEl) totalCostEl.textContent = '$0';
+            }
+        }
+        
+        document.getElementById('costForm').addEventListener('submit', function(e) {
+            const loading = document.getElementById('loading');
+            const submitBtn = document.querySelector('.predict-btn');
+            
+            loading.style.display = 'block';
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Calculating...';
+        });
+        
+        window.onload = function() {
+            updateDepth();
+            updateCostDisplay();
+        };
+        
+        document.getElementById('width').addEventListener('input', function(e) {
+            if (e.target.value < 0) e.target.value = 0;
+            calculateArea();
+        });
+        
+        document.getElementById('height').addEventListener('input', function(e) {
+            if (e.target.value < 0) e.target.value = 0;
+            calculateArea();
+        });
+        
+        document.getElementById('sign_type').addEventListener('change', updateDepth);
+    </script>
+</body>
+</html>
