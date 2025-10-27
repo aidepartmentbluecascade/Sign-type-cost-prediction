@@ -8,3 +8,4 @@ streamlit
 joblib
 openpyxl 
 flask
+google.oauth2
