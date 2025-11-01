@@ -55,13 +55,12 @@ def ensure_worksheet(sheet_title):
     # Add header row if sheet is empty
     if not ws.get_all_values():
         headers = [
-            "Timestamp",
-            "Sign Type",
-            "Height (in)",
-            "Width (in)",
+            "timestamp",
+            "sign type",
+            "height",
+            "width",
             "Predicted Shipping Cost",
-            "Predicted Production Cost",
-            "Feedback"
+            "Predicted Production Cost"
         ]
         ws.append_row(headers)
         print(f"✅ Added header row to {sheet_title}")
