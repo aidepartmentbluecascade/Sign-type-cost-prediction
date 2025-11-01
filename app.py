@@ -113,8 +113,10 @@ def save_feedback():
         production_cost = data.get("production_cost")
         shipping_cost = data.get("shipping_cost")
         feedback = data.get("feedback")
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
         row = [
+            timestamp,
             sign_type,
             height,
             width,
