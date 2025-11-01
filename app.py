@@ -4,7 +4,7 @@ from google.oauth2.service_account import Credentials
 import gspread
 import os, json, base64
 from dotenv import load_dotenv
-import datetime
+from datetime import datetime
 
 app = Flask(__name__)
 
