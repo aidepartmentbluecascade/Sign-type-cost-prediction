@@ -59,8 +59,8 @@ def ensure_worksheet(sheet_title):
             "sign type",
             "height",
             "width",
-            "Predicted Shipping Cost",
-            "Predicted Production Cost"
+            "Predicted - shipping Cost",
+            "Predicted - Production Cost"
         ]
         ws.append_row(headers)
         print(f"✅ Added header row to {sheet_title}")
