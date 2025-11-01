@@ -1,350 +1,977 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Sign Cost Predictor - Professional Estimation Tool</title>
-  <style>
-    * { margin:0; padding:0; box-sizing:border-box; }
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      min-height: 100vh; display:flex; align-items:center; justify-content:center;
-      padding:10px; overflow-x:hidden;
-    }
-    .container {
-      max-width:min(800px, 95vw); width:100%; background:#fff; border-radius:16px;
-      box-shadow:0 15px 35px rgba(0,0,0,0.1); max-height:95vh; overflow:auto;
-    }
-    .header {
-      background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
-      color:#fff; padding:24px 28px; text-align:center;
-    }
-    .header h1 { font-size:2rem; font-weight:300; margin-bottom:6px; }
-    .header p { opacity:.9; }
-    .form-container { padding:24px 28px; }
-    .form-grid { display:grid; grid-template-columns: repeat(2,1fr); gap:18px; margin-bottom:20px; }
-    .form-group:first-child { grid-column:1 / -1; }
-    .form-group label { display:block; margin-bottom:6px; font-weight:600; color:#2c3e50; font-size:.92rem; }
-    .form-group select, .form-group input {
-      width:100%; padding:12px; border:2px solid #e1e8ed; border-radius:10px; font-size:.95rem; background:#fff;
-      transition:.2s;
-    }
-    .form-group select:focus, .form-group input:focus {
-      outline:none; border-color:#667eea; box-shadow:0 0 0 3px rgba(102,126,234,.12);
-    }
-    .form-group input[readonly]{ background:#f8f9fa; color:#6c757d; }
-    .predict-btn{
-      width:100%; padding:14px; background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);
-      color:#fff; border:none; border-radius:10px; font-weight:700; letter-spacing:.3px; cursor:pointer; transition:.2s;
-    }
-    .predict-btn:hover{ transform:translateY(-1px); box-shadow:0 8px 16px rgba(102,126,234,.28); }
-    .loading{ display:none; text-align:center; margin-top:12px; }
-    .spinner{
-      border:3px solid #f3f3f3; border-top:3px solid #667eea; border-radius:50%;
-      width:26px; height:26px; animation:spin 1s linear infinite; margin:0 auto 8px;
-    }
-    @keyframes spin{ 0%{transform:rotate(0)} 100%{transform:rotate(360deg)} }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Cost Predictor</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-    .section-card{
-      margin-top:20px; padding:18px; background:linear-gradient(135deg,#f8f9fa 0%, #eef1f5 100%);
-      border-radius:12px; border-left:4px solid #667eea;
-    }
-    .section-title{ text-align:center; color:#2c3e50; font-size:1.15rem; margin-bottom:10px; font-weight:700; }
-    .cost-grid{ display:grid; grid-template-columns:repeat(2,1fr); gap:12px; }
-    .cost-item{ background:#fff; padding:14px; border-radius:10px; text-align:center; box-shadow:0 3px 10px rgba(0,0,0,.06); }
-    .cost-label{ font-size:.8rem; color:#6c757d; text-transform:uppercase; letter-spacing:.4px; margin-bottom:4px; }
-    .cost-value{ font-size:1.35rem; font-weight:800; color:#2c3e50; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 1rem;
+            line-height: 1.5;
+            overflow-y: auto;
+        }
 
-    .total-pill{
-      margin-top:12px; background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);
-      color:#fff; padding:16px; border-radius:12px; text-align:center;
-    }
-    .total-pill .cost-label{ color:rgba(255,255,255,.85); }
-    .total-pill .cost-value{ color:#fff; font-size:1.55rem; }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
 
-    .badge {
-      display:inline-flex; align-items:center; gap:6px; padding:6px 10px; border-radius:999px;
-      font-size:.8rem; font-weight:700;
-    }
-    .badge-success{ background:#e8f7ef; color:#0a8a48; border:1px solid #bde7ce; }
-    .badge-warn{ background:#fff4e5; color:#a45d00; border:1px solid #ffd9a8; }
+        /* More compact header */
+        .header {
+            text-align: center;
+            margin-top: 0.5rem;
+            color: white;
+            margin-bottom: 1.5rem;
+            /* Enhanced animation with longer duration and scale */
+            animation: slideDownFadeIn 1.2s ease-out;
+        }
 
-    .compare {
-      margin-top:14px; background:#fff; border-radius:12px; overflow:hidden; border:1px solid #e8ebf0;
-    }
-    .compare table { width:100%; border-collapse:collapse; }
-    .compare th, .compare td{ padding:12px 14px; border-bottom:1px solid #eef1f5; text-align:left; font-size:.95rem; }
-    .compare th{ background:#f6f8fb; color:#2c3e50; font-weight:700; }
-    .delta-pos{ color:#0a8a48; font-weight:700; }
-    .delta-neg{ color:#b00020; font-weight:700; }
+        .header h1 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            /* More contrasting gradient with gold/yellow tones for better visibility */
+            background: linear-gradient(90deg, #ffffff 0%, #fbbf24 25%, #ffffff 50%, #fbbf24 75%, #ffffff 100%);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: shimmerText 2s linear infinite;
+            /* Adding glow effect */
+            filter: drop-shadow(0 0 20px rgba(251, 191, 36, 0.5));
+        }
 
-    .feedback-wrap{ text-align:center; margin-top:16px; }
-    .emoji-btn{
-      font-size:2rem; cursor:pointer; background:none; border:none; margin:0 6px; transition:.15s; line-height:1;
-    }
-    .emoji-btn:hover{ transform:translateY(-1px) scale(1.05); }
-    .emoji-btn[disabled]{ opacity:.4; cursor:not-allowed; transform:none; }
+        .header p {
+            font-size: 0.875rem;
+            opacity: 0.95;
+        }
 
-    .hint { text-align:center; color:#6c757d; font-size:.9rem; margin-top:6px; }
+        /* Further reduced card padding */
+        .card {
+            background: white;
+            border-radius: 0.75rem;
+            padding: 1rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            margin-bottom: 0.75rem;
+        }
 
-    .error{
-      background:#ffebee; color:#c62828; padding:12px; border-radius:10px; border-left:4px solid #f44336; margin-top:14px;
-    }
+        .card.form-card {
+            padding: 1.5rem;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
 
-    @media (max-width: 820px){
-      .form-grid{ grid-template-columns:1fr; }
-      .cost-grid{ grid-template-columns:1fr; }
-    }
-  </style>
+        .card h2 {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 0.75rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #e5e7eb;
+        }
+
+        /* Tighter grid spacing */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 0.75rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            font-weight: 500;
+            color: #374151;
+            margin-bottom: 0.25rem;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.025em;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 0.5rem;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.025em;
+            transition: color 0.2s;
+        }
+
+        .form-group input,
+        .form-group select {
+            padding: 0.5rem 0.75rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            transition: all 0.2s;
+            background: white;
+        }
+
+        .form-group input,
+        .form-group select {
+            padding: 0.75rem 1rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            transition: all 0.3s ease;
+            background: white;
+            font-weight: 500;
+        }
+
+        .form-group input:hover:not([readonly]),
+        .form-group select:hover {
+            border-color: #cbd5e1;
+            background: #f8fafc;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+            background: white;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+            transform: translateY(-1px);
+        }
+
+        .form-group:focus-within label {
+            color: #667eea;
+        }
+
+        .form-group input[readonly] {
+            background: #f9fafb;
+            color: #6b7280;
+        }
+
+        .form-group input[readonly] {
+            background: #f3f4f6;
+            color: #6b7280;
+            cursor: not-allowed;
+            border-color: #e5e7eb;
+        }
+
+        .form-group input[readonly]:hover {
+            transform: none;
+            box-shadow: none;
+        }
+
+        .btn {
+            padding: 0.625rem 1.25rem;
+            border: none;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            width: 100%;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            width: 100%;
+            padding: 1rem 1.5rem;
+            font-size: 0.9375rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+
+        .btn-primary:hover::before {
+            left: 100%;
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin-top: 0.5rem;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 28px;
+            height: 28px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 0.375rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Optimized results layout */
+        .results-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.75rem;
+        }
+
+        .results-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.75rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .result-card {
+            background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            border: 2px solid #d1d5db;
+        }
+
+        .result-card h3 {
+            font-size: 0.875rem;
+            color: #374151;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .cost-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem;
+            background: white;
+            border-radius: 0.375rem;
+            margin-bottom: 0.375rem;
+        }
+
+        .cost-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .cost-label {
+            font-size: 0.75rem;
+            color: #6b7280;
+            font-weight: 500;
+        }
+
+        .cost-value {
+            font-size: 0.9375rem;
+            font-weight: 700;
+            color: #667eea;
+        }
+
+        .total-cost {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            text-align: center;
+            margin-top: 0.5rem;
+            /* Adding interactive hover effect like the button */
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        /* Adding shimmer effect to total cost cards */
+        .total-cost::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s;
+        }
+
+        .total-cost:hover:not(.dimmed) {
+            transform: translateY(-2px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        .total-cost:hover:not(.dimmed)::before {
+            left: 100%;
+        }
+
+        .total-cost:active:not(.dimmed) {
+            transform: translateY(0);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .total-cost .cost-label {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 0.75rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .total-cost .cost-value {
+            color: white;
+            font-size: 1.5rem;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border-radius: 9999px;
+            font-size: 0.625rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .badge-success {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .badge-warning {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .badge-info {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .no-match-message {
+            background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+            border: 2px solid #93c5fd;
+            border-radius: 0.75rem;
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+            text-align: center;
+            box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.1);
+        }
+
+        .no-match-message p {
+            color: #1e40af;
+            font-size: 1rem;
+            font-weight: 700;
+            margin: 0 0 0.5rem 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .no-match-message small {
+            color: #3b82f6;
+            font-size: 0.8125rem;
+            line-height: 1.5;
+            display: block;
+        }
+
+        .result-card.dimmed {
+            opacity: 0.5;
+            position: relative;
+            filter: blur(2px);
+            pointer-events: none;
+        }
+
+        .result-card.dimmed::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 0.5rem;
+            z-index: 1;
+        }
+
+        .result-card.dimmed::after {
+            content: 'N/A';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: #6b7280;
+            z-index: 2;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            letter-spacing: 0.05em;
+        }
+
+        .total-cost.dimmed {
+            opacity: 0.5;
+            background: linear-gradient(135deg, #9ca3af 0%, #6b7280 100%) !important;
+            filter: blur(2px);
+            position: relative;
+            pointer-events: none;
+        }
+
+        .total-cost.dimmed::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 0.5rem;
+            z-index: 1;
+        }
+
+        .total-cost.dimmed::after {
+            content: 'NO DATA';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: #374151;
+            z-index: 2;
+            letter-spacing: 0.1em;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes pulseGlow {
+            0%, 100% {
+                box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.1);
+            }
+            50% {
+                box-shadow: 0 4px 20px rgba(59, 130, 246, 0.3);
+            }
+        }
+
+        .no-match-message {
+            animation: fadeIn 0.5s ease-out, pulseGlow 2s ease-in-out infinite;
+        }
+
+        /* Completely redesigned feedback section with modern card-based UI */
+        .feedback-section {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            padding: 0;
+        }
+
+        .feedback-section p {
+            color: #374151;
+            font-weight: 600;
+            font-size: 0.9375rem;
+            margin: 0;
+            flex-shrink: 0;
+        }
+
+        .feedback-buttons {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        /* Modern button-style feedback controls */
+        .feedback-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.625rem 1.25rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 0.5rem;
+            background: white;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #374151;
+        }
+
+        .feedback-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .feedback-btn.thumbs-up:hover:not(:disabled) {
+            border-color: #22c55e;
+            background: #f0fdf4;
+            color: #16a34a;
+        }
+
+        .feedback-btn.thumbs-down:hover:not(:disabled) {
+            border-color: #ef4444;
+            background: #fef2f2;
+            color: #dc2626;
+        }
+
+        .feedback-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .feedback-btn .emoji {
+            font-size: 1.25rem;
+            line-height: 1;
+        }
+
+        /* Success message styling */
+        .feedback-success {
+            display: none;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.625rem 1rem;
+            background: #d1fae5;
+            border: 2px solid #6ee7b7;
+            border-radius: 0.5rem;
+            color: #065f46;
+            font-weight: 600;
+            font-size: 0.875rem;
+        }
+
+        .feedback-success.show {
+            display: flex;
+        }
+
+        .alert {
+            padding: 0.625rem 0.875rem;
+            border-radius: 0.5rem;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+        }
+
+        .alert-success {
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid #6ee7b7;
+        }
+
+        .alert-error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fca5a5;
+        }
+
+        @media (max-width: 1024px) {
+            .results-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.5rem;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .results-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .results-container {
+                grid-template-columns: 1fr;
+            }
+
+            /* Stack feedback section on mobile */
+            .feedback-section {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .feedback-buttons {
+                width: 100%;
+            }
+
+            .feedback-btn {
+                flex: 1;
+                justify-content: center;
+            }
+        }
+
+        /* Adding new animations for header */
+        @keyframes slideDownFadeIn {
+            from {
+                opacity: 0;
+                /* Increased distance and added scale for more dramatic effect */
+                transform: translateY(-50px) scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        @keyframes shimmerText {
+            0% {
+                background-position: 0% center;
+            }
+            100% {
+                /* Increased to 200% for smoother animation */
+                background-position: 200% center;
+            }
+        }
+    </style>
 </head>
 <body>
-  <div class="container">
-    <div class="header">
-      <h1>Sign Cost Predictor</h1>
-      <p>Professional estimation tool for custom signage projects</p>
-    </div>
-
-    <div class="form-container">
-      <form method="post" id="costForm">
-        <div class="form-grid">
-          <div class="form-group">
-            <label for="sign_type">Sign Type</label>
-            <select name="sign_type" id="sign_type" required>
-              <option value="">Select sign type...</option>
-              <option value="Flatcut Letters">Flatcut Letters</option>
-              <option value="Blade Sign">Blade Sign</option>
-              <option value="Halo lit Chanel letter sign">Halo lit Channel Letter Sign</option>
-            </select>
-          </div>
-
-          <div class="form-group">
-            <label for="width">Width (inches)</label>
-            <input type="number" name="width" id="width" step="0.1" min="0.1" required placeholder="Enter width">
-          </div>
-
-          <div class="form-group">
-            <label for="height">Height (inches)</label>
-            <input type="number" name="height" id="height" step="0.1" min="0.1" required placeholder="Enter height">
-          </div>
-
-          <div class="form-group">
-            <label for="depth">Depth (inches)</label>
-            <input type="number" name="depth" id="depth" step="0.01" readonly>
-          </div>
-
-          <div class="form-group">
-            <label for="area">Area (sq. inches)</label>
-            <input type="number" name="area" id="area" step="0.1" readonly>
-          </div>
+    <div class="container">
+        <div class="header">
+            <h1>Shipping & Production Sign Cost Predictor</h1>
         </div>
 
-        <button type="submit" class="predict-btn">Calculate Cost Estimate</button>
-
-        <div class="loading" id="loading">
-          <div class="spinner"></div>
-          <p>Calculating your estimate...</p>
+        {% if message %}
+        <div class="alert alert-{{ 'success' if 'successfully' in message.lower() else 'error' }}">
+            <span>{{ '✓' if 'successfully' in message.lower() else '⚠' }}</span>
+            <span>{{ message }}</span>
         </div>
-      </form>
-
-      {% if result %}
-        {% if result.error %}
-          <div class="error">{{ result.error }}</div>
-
-        {% else %}
-          <!-- PREDICTED -->
-          <div class="section-card" aria-live="polite">
-            <div class="section-title">Predicted Cost</div>
-            <div class="cost-grid">
-              <div class="cost-item">
-                <div class="cost-label">Predicted Production Cost</div>
-                <div class="cost-value">${{ result.production_cost }}</div>
-              </div>
-              <div class="cost-item">
-                <div class="cost-label">Predicted Shipping Cost</div>
-                <div class="cost-value">${{ result.shipping_cost }}</div>
-              </div>
-            </div>
-            <div class="total-pill">
-              <div class="cost-label">Total Estimated Cost</div>
-              <div class="cost-value">${{ result.total_cost }}</div>
-            </div>
-          </div>
-
-          {% if result.exact_match %}
-            <!-- ACTUAL (EXACT MATCH FOUND) -->
-            <div class="section-card" style="border-left-color:#16a34a;">
-              <div class="section-title">
-            <div class="section-title">Actual Cost</div>
-              </div>
-
-              <div class="cost-grid">
-                <div class="cost-item">
-                  <div class="cost-label">Actual Production Cost</div>
-                  <div class="cost-value">${{ result.actual_production_cost }}</div>
-                </div>
-                <div class="cost-item">
-                  <div class="cost-label">Actual Shipping Cost</div>
-                  <div class="cost-value">${{ result.actual_shipping_cost }}</div>
-                </div>
-              </div>
-
-              <div class="total-pill" style="background:linear-gradient(135deg,#16a34a 0%, #22c55e 100%);">
-                <div class="cost-label">Actual Total Cost</div>
-                <div class="cost-value">${{ result.actual_total_cost }}</div>
-              </div>
-
-              <!-- SIDE-BY-SIDE COMPARISON -->
-              
-            </div>
-          {% else %}
-            <!-- NO EXACT MATCH -->
-            <div class="section-card" style="border-left-color:#f59e0b;">
-              <div class="section-title">
-                <span class="badge badge-warn">! No exact dataset match — showing prediction only</span>
-              </div>
-              <p class="hint">Tip: Try exact values from the training source to see actual costs side-by-side.</p>
-            </div>
-          {% endif %}
-
-          <!-- FEEDBACK UI -->
-          <div class="section-card" style="border-left-color:#6366f1;">
-            <div class="section-title">Your Feedback</div>
-            <div class="feedback-wrap">
-              <p class="hint" style="margin-bottom:8px;">Was this estimate acceptable?</p>
-              <button id="thumbsUp" class="emoji-btn" title="Acceptable">👍</button>
-              <button id="thumbsDown" class="emoji-btn" title="UnAcceptable">👎</button>
-            </div>
-          </div>
         {% endif %}
-      {% else %}
-        <!-- DEFAULT PLACEHOLDER -->
-        <div class="section-card" id="defaultResults">
-          <div class="section-title">Cost Breakdown</div>
-          <div class="cost-grid">
-            <div class="cost-item">
-              <div class="cost-label">Production Cost</div>
-              <div class="cost-value" id="productionCost">$0</div>
-            </div>
-            <div class="cost-item">
-              <div class="cost-label">Shipping Cost</div>
-              <div class="cost-value" id="shippingCost">$0</div>
-            </div>
-          </div>
-          <div class="total-pill">
-            <div class="cost-label">Total Estimated Cost</div>
-            <div class="cost-value" id="totalCost">$0</div>
-          </div>
+
+        <div class="card form-card">
+            <h2>Calculate Sign Cost</h2>
+            <form method="POST" action="/" id="costForm">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="sign_type">Sign Type</label>
+                        <select id="sign_type" name="sign_type" required>
+                            <option value="">Select sign type...</option>
+                            {% set selected_type = request.form.get('sign_type', '') %}
+                            <option value="Flatcut Letters" {% if selected_type=="Flatcut Letters" %}selected{% endif %}>Flatcut Letters</option>
+                            <option value="Blade Sign" {% if selected_type=="Blade Sign" %}selected{% endif %}>Blade Sign</option>
+                            <option value="Halo lit Chanel letter sign" {% if selected_type=="Halo lit Chanel letter sign" %}selected{% endif %}>Halo-lit Channel Letter Sign</option>
+                            <option value="Fabricated Letters- Nonlit" {% if selected_type=="Fabricated Letters- Nonlit" %}selected{% endif %}>Fabricated Letters - Nonlit</option>
+                            <option value="UV Acrylic Sign" {% if selected_type=="UV Acrylic Sign" %}selected{% endif %}>UV Acrylic Sign</option>
+                            <option value="Halo lit Chanel letter sign with backboard" {% if selected_type=="Halo lit Chanel letter sign with backboard" %}selected{% endif %}>Halo-lit Channel Letter Sign with Backboard</option>
+                            <option value="Facelit Channel letter" {% if selected_type=="Facelit Channel letter" %}selected{% endif %}>Facelit Channel Letter</option>
+                            <option value="Lightbox" {% if selected_type=="Lightbox" %}selected{% endif %}>Lightbox</option>
+                            <option value="Push-thru Cabinet Sign" {% if selected_type=="Push-thru Cabinet Sign" %}selected{% endif %}>Push-thru Cabinet Sign</option>
+                            <option value="Facelit and Halo lit Channel letter" {% if selected_type=="Facelit and Halo lit Channel letter" %}selected{% endif %}>Facelit and Halo-lit Channel Letter</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="height">Height (inches)</label>
+                        <input type="number" name="height" id="height" step="0.1" min="0.1" required placeholder="Enter height" value="{{ request.form.get('height', '') }}">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="width">Width (inches)</label>
+                        <input type="number" name="width" id="width" step="0.1" min="0.1" required placeholder="Enter width" value="{{ request.form.get('width', '') }}">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="depth">Depth (inches)</label>
+                        <input type="number" name="depth" id="depth" step="0.01" readonly>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="area">Area (sq. inches)</label>
+                        <input type="number" name="area" id="area" step="0.1" readonly>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary">Calculate Cost Estimate</button>
+
+                <div class="loading" id="loading">
+                    <div class="spinner"></div>
+                    <p>Calculating your estimate...</p>
+                </div>
+            </form>
         </div>
-      {% endif %}
+
+        {% if result %}
+        {% if result.error %}
+        <div class="alert alert-error">
+            <span>⚠</span>
+            <span>{{ result.error }}</span>
+        </div>
+        {% else %}
+        <div class="results-container">
+            <div class="card">
+                <h2>
+                    Predicted Cost
+                    {% if not result.exact_match %}
+                    <span class="badge badge-warning">⚠ Estimated</span>
+                    {% endif %}
+                </h2>
+                
+                <div class="results-grid">
+                    <div class="result-card">
+                        <h3>Production</h3>
+                        <div class="cost-item">
+                            <span class="cost-label">Predicted</span>
+                            <span class="cost-value">${{ result.production_cost }}</span>
+                        </div>
+                    </div>
+
+                    <div class="result-card">
+                        <h3>Shipping</h3>
+                        <div class="cost-item">
+                            <span class="cost-label">Predicted</span>
+                            <span class="cost-value">${{ result.shipping_cost }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="total-cost">
+                    <div class="cost-label">Total Estimated</div>
+                    <div class="cost-value">${{ result.total_cost }}</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>
+                    Actual Cost
+                    {% if result.exact_match %}
+                    <span class="badge badge-success">✓ Exact Match</span>
+                    {% else %}
+                    <span class="badge badge-info">ℹ No Exact Match</span>
+                    {% endif %}
+                </h2>
+                
+                {% if not result.exact_match %}
+                <div class="no-match-message">
+                    <p>📊 No exact match found in database</p>
+                    <small>The dimensions you entered don't match any existing records.</small>
+                </div>
+                {% endif %}
+
+                <div class="results-grid">
+                    <div class="result-card {% if not result.exact_match %}dimmed{% endif %}">
+                        <h3>Production</h3>
+                        <div class="cost-item">
+                            <span class="cost-label">Actual</span>
+                            <span class="cost-value">{% if result.exact_match %}${{ result.actual_production_cost }}{% else %}—{% endif %}</span>
+                        </div>
+                    </div>
+
+                    <div class="result-card {% if not result.exact_match %}dimmed{% endif %}">
+                        <h3>Shipping</h3>
+                        <div class="cost-item">
+                            <span class="cost-label">Actual</span>
+                            <span class="cost-value">{% if result.exact_match %}${{ result.actual_shipping_cost }}{% else %}—{% endif %}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="total-cost {% if not result.exact_match %}dimmed{% endif %}" style="background: linear-gradient(135deg, #16a34a 0%, #22c55e 100%);">
+                    <div class="cost-label">Actual Total</div>
+                    <div class="cost-value">{% if result.exact_match %}${{ result.actual_total_cost }}{% else %}—{% endif %}</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Completely redesigned feedback section with modern button UI -->
+        <div class="card">
+            <h2>Your Feedback</h2>
+            <div class="feedback-section" id="feedbackSection">
+                <p>Was this estimate acceptable?</p>
+                <div class="feedback-buttons">
+                    <button id="thumbsUp" class="feedback-btn thumbs-up" title="Acceptable">
+                        <span class="emoji">👍</span>
+                        <span>Acceptable</span>
+                    </button>
+                    <button id="thumbsDown" class="feedback-btn thumbs-down" title="Unacceptable">
+                        <span class="emoji">👎</span>
+                        <span>Unacceptable</span>
+                    </button>
+                </div>
+            </div>
+            <div class="feedback-success" id="feedbackSuccess">
+                <span>✓</span>
+                <span>Feedback recorded successfully!</span>
+            </div>
+        </div>
+        {% endif %}
+        {% endif %}
     </div>
-  </div>
 
-  <script>
-    // ----- UI helpers -----
-    const depthValues = {
-      'Flatcut Letters': 0.25,
-      'Blade Sign': 2.0,
-      'Halo lit Chanel letter sign': 1.0
-    };
+    <script>
+        // Depth values for each sign type
+        const depthValues = {
+            'Flatcut Letters': 0.25,
+            'Blade Sign': 2.0,
+            'Halo lit Chanel letter sign': 1.0,
+            'Fabricated Letters- Nonlit': 1.0,
+            'UV Acrylic Sign': 0.75,
+            'Halo lit Chanel letter sign with backboard': 3.0,
+            'Facelit Channel letter': 5.0,
+            'Lightbox': 5.0,
+            'Push-thru Cabinet Sign': 2.3,
+            'Facelit and Halo lit Channel letter': 3.5
+        };
 
-    const formEl = document.getElementById('costForm');
-    const depthEl = document.getElementById('depth');
-    const areaEl  = document.getElementById('area');
-    const signSel = document.getElementById('sign_type');
-    const widthEl = document.getElementById('width');
-    const heightEl= document.getElementById('height');
+        const formEl = document.getElementById('costForm');
+        const depthEl = document.getElementById('depth');
+        const areaEl = document.getElementById('area');
+        const signSel = document.getElementById('sign_type');
+        const widthEl = document.getElementById('width');
+        const heightEl = document.getElementById('height');
 
-    function updateDepth() {
-      const t = signSel.value;
-      depthEl.value = depthValues[t] || '';
-      calcArea();
-    }
-    function calcArea() {
-      const w = parseFloat(widthEl.value);
-      const h = parseFloat(heightEl.value);
-      if (!isNaN(w) && !isNaN(h)) areaEl.value = (w*h).toFixed(2);
-      else areaEl.value = '';
-    }
-
-    signSel.addEventListener('change', updateDepth);
-    widthEl.addEventListener('input', calcArea);
-    heightEl.addEventListener('input', calcArea);
-
-    formEl.addEventListener('submit', function(){
-      document.getElementById('loading').style.display = 'block';
-      // Reset feedback lock for the next prediction
-      window.feedbackGiven = false;
-      const up = document.getElementById("thumbsUp");
-      const dn = document.getElementById("thumbsDown");
-      if (up && dn){ up.disabled = false; dn.disabled = false; up.style.opacity = '1'; dn.style.opacity = '1'; }
-    });
-
-    // ----- Feedback logic -----
-    const thumbsUp   = document.getElementById("thumbsUp");
-    const thumbsDown = document.getElementById("thumbsDown");
-    let feedbackGiven = false;
-
-    function disableButtons() {
-      if (!thumbsUp || !thumbsDown) return;
-      thumbsUp.disabled = true; thumbsDown.disabled = true;
-      thumbsUp.style.opacity = "0.4"; thumbsDown.style.opacity = "0.4";
-      thumbsUp.style.cursor = "not-allowed"; thumbsDown.style.cursor = "not-allowed";
-      const fbHint = document.getElementById('fbHint');
-      if (fbHint) fbHint.textContent = "Feedback recorded. Make a new prediction to submit again.";
-    }
-
-    function sendFeedback(status) {
-      if (feedbackGiven) {
-        alert("⚠️ You’ve already submitted feedback. Please make a new prediction first.");
-        return;
-      }
-
-      // These values come from the last POST render (server-side)
-      const sign_type       = "{{ request.form.get('sign_type', '') }}";
-      const width           = "{{ request.form.get('width', '') }}";
-      const height          = "{{ request.form.get('height', '') }}";
-      const production_cost = "{{ result.production_cost if result else '' }}";
-      const shipping_cost   = "{{ result.shipping_cost if result else '' }}";
-
-      if (!sign_type || !width || !height || !production_cost || !shipping_cost) {
-        alert("Please calculate a prediction first.");
-        return;
-      }
-
-      fetch("/feedback", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          sign_type,
-          width,
-          height,
-          production_cost,
-          shipping_cost,
-          feedback: status
-        })
-      })
-      .then(r => r.json())
-      .then(data => {
-        if (data.status === "success"){
-          feedbackGiven = true;
-          disableButtons();
-          alert(`✅ Feedback saved as "${status}"`);
-        } else {
-          alert("❌ Failed to save feedback. Please try again.");
+        function updateDepth() {
+            const signType = signSel.value;
+            depthEl.value = depthValues[signType] || '';
+            calcArea();
         }
-      })
-      .catch(err => {
-        console.error(err);
-        alert("⚠️ Error sending feedback. Check console for details.");
-      });
-    }
 
-    thumbsUp  && thumbsUp.addEventListener("click", () => sendFeedback("Acceptable"));
-    thumbsDown&& thumbsDown.addEventListener("click", () => sendFeedback("UnAcceptable"));
+        function calcArea() {
+            const width = parseFloat(widthEl.value);
+            const height = parseFloat(heightEl.value);
+            if (!isNaN(width) && !isNaN(height)) {
+                areaEl.value = (width * height).toFixed(2);
+            } else {
+                areaEl.value = '';
+            }
+        }
 
-    // Initialize computed fields
-    updateDepth(); calcArea();
-  </script>
+        signSel.addEventListener('change', updateDepth);
+        widthEl.addEventListener('input', calcArea);
+        heightEl.addEventListener('input', calcArea);
+
+        formEl.addEventListener('submit', function() {
+            document.getElementById('loading').style.display = 'block';
+            window.feedbackGiven = false;
+            const up = document.getElementById('thumbsUp');
+            const dn = document.getElementById('thumbsDown');
+            if (up && dn) {
+                up.disabled = false;
+                dn.disabled = false;
+            }
+            const successMsg = document.getElementById('feedbackSuccess');
+            if (successMsg) successMsg.classList.remove('show');
+            const feedbackSection = document.getElementById('feedbackSection');
+            if (feedbackSection) feedbackSection.style.display = 'flex';
+        });
+
+        updateDepth();
+        calcArea();
+
+        const thumbsUp = document.getElementById('thumbsUp');
+        const thumbsDown = document.getElementById('thumbsDown');
+        let feedbackGiven = false;
+
+        function disableButtons() {
+            if (!thumbsUp || !thumbsDown) return;
+            thumbsUp.disabled = true;
+            thumbsDown.disabled = true;
+            const successMsg = document.getElementById('feedbackSuccess');
+            const feedbackSection = document.getElementById('feedbackSection');
+            if (successMsg) successMsg.classList.add('show');
+            if (feedbackSection) feedbackSection.style.display = 'none';
+        }
+
+        function sendFeedback(status) {
+            if (feedbackGiven) {
+                alert('⚠️ You have already submitted feedback. Please make a new prediction first.');
+                return;
+            }
+
+            const sign_type = "{{ request.form.get('sign_type', '') }}";
+            const width = "{{ request.form.get('width', '') }}";
+            const height = "{{ request.form.get('height', '') }}";
+            const production_cost = "{{ result.production_cost if result else '' }}";
+            const shipping_cost = "{{ result.shipping_cost if result else '' }}";
+
+            if (!sign_type || !width || !height || !production_cost || !shipping_cost) {
+                alert('Please calculate a prediction first.');
+                return;
+            }
+
+            fetch('/feedback', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    sign_type,
+                    width,
+                    height,
+                    production_cost,
+                    shipping_cost,
+                    feedback: status
+                })
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    feedbackGiven = true;
+                    disableButtons();
+                } else {
+                    alert('❌ Failed to save feedback. Please try again.');
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                alert('⚠️ Error sending feedback. Check console for details.');
+            });
+        }
+
+        if (thumbsUp) thumbsUp.addEventListener('click', () => sendFeedback('Acceptable'));
+        if (thumbsDown) thumbsDown.addEventListener('click', () => sendFeedback('UnAcceptable'));
+    </script>
 </body>
 </html>
