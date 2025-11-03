@@ -5,7 +5,7 @@ import gspread
 import os, json, base64
 from dotenv import load_dotenv
 from datetime import datetime
-
+import pytz
 app = Flask(__name__)
 
 print("Initializing machine learning models...")
@@ -113,8 +113,10 @@ def save_feedback():
         production_cost = data.get("production_cost")
         shipping_cost = data.get("shipping_cost")
         feedback = data.get("feedback")
-        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
+        pakistan_tz = pytz.timezone('Asia/Karachi')
+        timestamp = datetime.now(pakistan_tz).strftime("%Y-%m-%d %H:%M:%S")
+    
         row = [
             timestamp,
             sign_type,
