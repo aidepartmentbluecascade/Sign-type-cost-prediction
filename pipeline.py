@@ -143,7 +143,7 @@ class SignCostPredictor:
     # ---------------------------------------------------------------
     def train_models(self, df):
         """Train ML models for shipping and production cost"""
-        X = df[['sign_type', 'width', 'height', 'depth', 'area']]
+        X = df[['sign_type', 'width', 'height', 'area']]
         y = df[['shipping_cost', 'production_cost']]
 
         # Oversampling for balanced training
@@ -151,7 +151,7 @@ class SignCostPredictor:
         y_aug = y.loc[X_aug.index]
 
         categorical_features = ['sign_type']
-        numerical_features = ['width', 'height', 'depth', 'area']
+        numerical_features = ['width', 'height', 'area']
 
         preprocessor = ColumnTransformer(
             transformers=[
