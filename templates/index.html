@@ -727,14 +727,17 @@
                     </div>
 
                     <div class="form-group">
+
+                          <div class="form-group">
+                        <label for="width">Width (inches)</label>
+                        <input type="number" name="width" id="width" step="0.1" min="0.1" required placeholder="Enter width" value="{{ request.form.get('width', '') }}">
+                    </div>
+                        
                         <label for="height">Height (inches)</label>
                         <input type="number" name="height" id="height" step="0.1" min="0.1" required placeholder="Enter height" value="{{ request.form.get('height', '') }}">
                     </div>
 
-                    <div class="form-group">
-                        <label for="width">Width (inches)</label>
-                        <input type="number" name="width" id="width" step="0.1" min="0.1" required placeholder="Enter width" value="{{ request.form.get('width', '') }}">
-                    </div>
+                  
 
                     <div class="form-group">
                         <label for="depth">Depth (inches)</label>
